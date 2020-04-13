@@ -4,21 +4,20 @@ from sessionista.store import store
 MY_ACTION = 'my_action'
 
 def my_action(state):
-    store.state.update(state)
-    return store.state
+    state['key'] = 'mutated value'
+    return state
 
-def register_reducer(reducer):
-    store.register(reducer)
-    return store
+def test_register_action():
+    store.register([my_action])
+    assert my_action.__name__ in store.actions.keys()
 
-def test_register_reducer():
-    store = register_reducer([my_action])
-    assert my_action.__name__ in store.reducers.keys()
+def test_store_dispatch_action():
+    new_state = store.dispatch(MY_ACTION, state={'key': 'value'})
+    store.state.update(new_state)
 
-def test_store_dispatch_reducer():
-    assert store.dispatch(MY_ACTION, state={'new': 'state'})
+def test_mutate_state():
+    assert 'key' in list(store.state.keys())
 
-def test_unregister_reducer():
-    store = register_reducer([my_action])
+def test_unregister_action():
     store.unregister(my_action)
-    assert my_action.__name__ not in store.reducers.keys()
+    assert my_action.__name__ not in store.actions.keys()
